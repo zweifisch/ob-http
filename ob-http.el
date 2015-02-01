@@ -1,3 +1,13 @@
+;;; ob-http.el --- http request in org-mode babel
+
+;; Copyright (C) 2015 ZHOU Feng
+
+;; Author: ZHOU Feng <zf.pascal@gmail.com>
+;; URL: http://github.com/zweifisch/ob-http
+;; Version: 0.0.1
+;; Package-Requires: ((s "1.9.0"))
+
+;;; Code:
 (require 'org)
 (require 'ob)
 (require 's)
@@ -85,3 +95,4 @@
       result)))
 
 (provide 'ob-http)
+;;; ob-http.el ends here
