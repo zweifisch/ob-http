@@ -2,6 +2,7 @@
 (require 'ob)
 (require 's)
 (require 'json)
+(require 'http-mode)
 
 (defgroup ob-http nil
   "org-mode blocks for http request"
