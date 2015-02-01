@@ -2,6 +2,7 @@
   
 requires curl
 
+#+BEGIN_EXAMPLE
 #+BEGIN_SRC http :pretty
 GET https://api.github.com/repos/zweifisch/ob-http/languages
 Accept: application/vnd.github.moondragon+json
@@ -11,6 +12,7 @@ Accept: application/vnd.github.moondragon+json
 : {
 :   "Emacs Lisp": 5021
 : }
+#+END_EXAMPLE
 
 ** options
 
@@ -20,12 +22,13 @@ currently only json is supported
 |---------------+----------------+-------------------------|
 | =:proxy=      | =-x=           | =:proxy localhost:8118= |
 | =:pretty=     | N/A            | =:pretty=               |
-| =:cookie-jar= | =--cookie-jar= |                         |
-| =:cookie=     | =--cookie=     |                         |
+| =:cookie-jar= | =--cookie-jar= | =:cookie-jar username=  |
+| =:cookie=     | =--cookie=     | =:cookie username=      |
 | =:max-time=   | =--max-time=   | default is =10=         |
 
 ** examples
    
+#+BEGIN_EXAMPLE
 #+BEGIN_SRC http :pretty
 POST http://httpbin.org/post
 Content-Type: application/json
@@ -36,7 +39,6 @@ Content-Type: application/json
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
 {
   "url": "http://httpbin.org/post",
   "json": {
@@ -54,15 +56,15 @@ Content-Type: application/json
   "data": "{  \"key\": \"value\"}",
   "args": {}
 }
-#+end_example
+#+END_EXAMPLE
 
+#+BEGIN_EXAMPLE
 #+BEGIN_SRC http
 GET http://httpbin.org/user-agent
 User-Agent: ob-http
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
 HTTP/1.1 200 OK
 Server: nginx
 Date: Sun, 01 Feb 2015 12:04:39 GMT
@@ -75,8 +77,9 @@ Access-Control-Allow-Credentials: true
 {
   "user-agent": "ob-http"
 }
-#+end_example
+#+END_EXAMPLE
 
+#+BEGIN_EXAMPLE
 #+BEGIN_SRC http :pretty
 PATCH http://httpbin.org/patch
 
@@ -84,7 +87,6 @@ key=value&foo=value
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
 {
   "url": "http://httpbin.org/patch",
   "origin": "116.227.144.38",
@@ -104,5 +106,4 @@ key=value&foo=value
   "data": "",
   "args": {}
 }
-#+end_example
-
+#+END_EXAMPLE
