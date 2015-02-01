@@ -15,38 +15,18 @@
 
 (defstruct ob-http/request method url headers body)
 
-(defun ob-http/take-while (pred coll)
-  (cond ((not coll) '())
-        (t (if (apply pred (list (car coll)))
-             (cons (car coll) (ob-http/take-while pred (cdr coll)))
-             '()))))
-
-(defun ob-http/drop-while (pred coll)
-  (cond ((not coll) '())
-        (t (if (apply pred (list (car coll)))
-             (ob-http/drop-while pred (cdr coll))
-             coll))))
-
-(defun ob-http/split-with (pred coll)
-  (list (ob-http/take-while pred coll) (ob-http/drop-while pred coll)))
-
-(defun ob-http/string-is-empty (s)
-  (or (string= "" s) (if (string-match "\\`[ \t\n\r]+\\'" s) t nil)))
-
 (defun ob-http/parse-input (input)
-  (let* ((header-body (ob-http/split-with
-                       (lambda (x) (not (ob-http/string-is-empty x)))
-                       (s-lines input)))
-         (body (cadr header-body))
-         (headers (car header-body))
-         (method-url (split-string (car headers) " "))
-         (method (car method-url))
-         (url (cadr method-url)))
+  (let* ((headers-body (ob-http/split-header-body input))
+         (headers (s-split-up-to "\\(\r\n\\|[\n\r]\\)" (car headers-body) 1))
+         (method-url (split-string (car  headers) " ")))
     (make-ob-http/request
-     :method method
-     :url url
-     :headers (nthcdr 1 headers)
-     :body (mapconcat 'identity (nthcdr 1 body) "\n"))))
+     :method (car method-url)
+     :url (cadr method-url)
+     :headers (if (cadr headers) (s-lines (cadr headers)))
+     :body (cadr headers-body))))
+
+(defun ob-http/split-header-body (input)
+  (s-split-up-to "\\(\r\n\\|[\n\r]\\)[ \t]*\\1" input 1))
 
 (defun ob-http/pretty-json (str)
   (if (executable-find "jq")
@@ -67,9 +47,8 @@
   (if (s-contains? "json" content-type) "json" nil))
 
 (defun ob-http/pretty (str content-type)
-  (let ((type (parse-content-type content-type)))
-    (cond ((string= "json" type) (ob-http/pretty-json str))
-          (t (ob-http/pretty-json str)))))
+  (let ((type (if content-type (parse-content-type content-type) "json")))
+    (cond ((string= "json" type) (ob-http/pretty-json str)))))
 
 (defun org-babel-execute:http (body params)
   (let* ((req (ob-http/parse-input body))
@@ -83,25 +62,22 @@
          (cmd (s-format "curl -is ${proxy} ${method} ${headers} ${cookie-jar} ${cookie} ${body} \"${url}\" --max-time ${max-time}" 'aget
                         `(("proxy" . ,(if proxy (format "-x %s" proxy) ""))
                           ("method" . ,(let ((method (ob-http/request-method req)))
-                                        (if (string= "HEAD" method) "-I" (format "-X %s" method))))
+                                         (if (string= "HEAD" method) "-I" (format "-X %s" method))))
                           ("headers" . ,(mapconcat (lambda (x) (format "-H \"%s\"" x))
-                                                  (ob-http/request-headers req) ""))
-                          ("body" . ,(if (not (ob-http/string-is-empty body))
-                                        (let ((tmp (org-babel-temp-file "http-")))
-                                          (with-temp-file tmp (insert body))
-                                          (format "-d @\"%s\"" tmp))
-                                      ""))
+                                                   (ob-http/request-headers req) ""))
+                          ("body" . ,(if (s-present? body)
+                                         (let ((tmp (org-babel-temp-file "http-")))
+                                           (with-temp-file tmp (insert body))
+                                           (format "-d @\"%s\"" tmp))
+                                       ""))
                           ("url" . ,(ob-http/request-url req))
                           ("cookie-jar" . ,(if cookie-jar (format "--cookie-jar %s" cookie-jar) ""))
                           ("cookie" . ,(if cookie (format "--cookie %s" cookie) ""))
                           ("max-time" . ,(int-to-string (or max-time ob-http:max-time))))))
          (result (shell-command-to-string cmd))
-         (header-body (ob-http/split-with
-                       (lambda (x) (not (ob-http/string-is-empty x)))
-                       (s-lines result)))
-         (result-headers (mapcar 'parse-header (car header-body)))
-         (result-body (s-join "\n" (nthcdr 1 (cadr header-body)))))
-    
+         (header-body (ob-http/split-header-body result))
+         (result-headers (mapcar 'parse-header (s-lines (car header-body))))
+         (result-body (cadr header-body)))
     (message cmd)
     (if pretty
         (ob-http/pretty result-body (or (cdr pretty)
