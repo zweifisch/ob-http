@@ -1,0 +1,108 @@
+* ob-http
+  
+requires curl
+
+#+BEGIN_SRC http :pretty
+GET https://api.github.com/repos/zweifisch/ob-http/languages
+Accept: application/vnd.github.moondragon+json
+#+END_SRC
+
+#+RESULTS:
+: {
+:   "Emacs Lisp": 5021
+: }
+
+** options
+
+currently only json is supported
+
+| option        | curl           | example                 |
+|---------------+----------------+-------------------------|
+| =:proxy=      | =-x=           | =:proxy localhost:8118= |
+| =:pretty=     | N/A            | =:pretty=               |
+| =:cookie-jar= | =--cookie-jar= |                         |
+| =:cookie=     | =--cookie=     |                         |
+| =:max-time=   | =--max-time=   | default is =10=         |
+
+** examples
+   
+#+BEGIN_SRC http :pretty
+POST http://httpbin.org/post
+Content-Type: application/json
+
+{
+  "key": "value"
+}
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+{
+  "url": "http://httpbin.org/post",
+  "json": {
+    "key": "value"
+  },
+  "headers": {
+    "User-Agent": "curl/7.35.0",
+    "Host": "httpbin.org",
+    "Content-Type": "application/json",
+    "Content-Length": "18",
+    "Accept": "*/*"
+  },
+  "form": {},
+  "files": {},
+  "data": "{  \"key\": \"value\"}",
+  "args": {}
+}
+#+end_example
+
+#+BEGIN_SRC http
+GET http://httpbin.org/user-agent
+User-Agent: ob-http
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 01 Feb 2015 12:04:39 GMT
+Content-Type: application/json
+Content-Length: 30
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "user-agent": "ob-http"
+}
+#+end_example
+
+#+BEGIN_SRC http :pretty
+PATCH http://httpbin.org/patch
+
+key=value&foo=value
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+{
+  "url": "http://httpbin.org/patch",
+  "origin": "116.227.144.38",
+  "json": null,
+  "headers": {
+    "User-Agent": "curl/7.35.0",
+    "Host": "httpbin.org",
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Content-Length": "19",
+    "Accept": "*/*"
+  },
+  "form": {
+    "key": "value",
+    "foo": "value"
+  },
+  "files": {},
+  "data": "",
+  "args": {}
+}
+#+end_example
+

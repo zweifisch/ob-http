@@ -63,7 +63,7 @@
                         `(("proxy" . ,(if proxy (format "-x %s" proxy) ""))
                           ("method" . ,(let ((method (ob-http/request-method req)))
                                          (if (string= "HEAD" method) "-I" (format "-X %s" method))))
-                          ("headers" . ,(mapconcat (lambda (x) (format "-H \"%s\"" x))
+                          ("headers" . ,(mapconcat (lambda (x) (format " -H \"%s\"" x))
                                                    (ob-http/request-headers req) ""))
                           ("body" . ,(if (s-present? body)
                                          (let ((tmp (org-babel-temp-file "http-")))
