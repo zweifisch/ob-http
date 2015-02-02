@@ -16,13 +16,13 @@ requires curl
 
 currently only json is supported
 
-| option        | curl           | example                 |
-|---------------+----------------+-------------------------|
-| =:proxy=      | =-x=           | =:proxy localhost:8118= |
-| =:pretty=     | N/A            | =:pretty=               |
-| =:cookie-jar= | =--cookie-jar= | =:cookie-jar username=  |
-| =:cookie=     | =--cookie=     | =:cookie username=      |
-| =:max-time=   | =--max-time=   | default is =10=         |
+| option        | curl           | example                                                   |
+|---------------+----------------+-----------------------------------------------------------|
+| =:proxy=      | =-x=           | =:proxy localhost:8118=                                   |
+| =:pretty=     | N/A            | =:pretty= use =Content-Type=, to overwrite =:pretty json= |
+| =:cookie-jar= | =--cookie-jar= | =:cookie-jar username=                                    |
+| =:cookie=     | =--cookie=     | =:cookie username=                                        |
+| =:max-time=   | =--max-time=   | default is =10=                                           |
 
 ** examples
    
@@ -56,26 +56,15 @@ currently only json is supported
 : }
 : #+end_example
 
-: #+BEGIN_SRC http
+: #+BEGIN_SRC http :pretty
 : GET http://httpbin.org/user-agent
 : User-Agent: ob-http
 : #+END_SRC
 : 
 : #+RESULTS:
-: #+begin_example
-: HTTP/1.1 200 OK
-: Server: nginx
-: Date: Sun, 01 Feb 2015 12:04:39 GMT
-: Content-Type: application/json
-: Content-Length: 30
-: Connection: keep-alive
-: Access-Control-Allow-Origin: *
-: Access-Control-Allow-Credentials: true
-: 
-: {
-:   "user-agent": "ob-http"
-: }
-: #+end_example
+: : {
+: :   "user-agent": "ob-http"
+: : }
 
 : #+BEGIN_SRC http :pretty
 : PATCH http://httpbin.org/patch

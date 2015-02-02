@@ -7,12 +7,17 @@
 ;; Version: 0.0.1
 ;; Package-Requires: ((s "1.9.0"))
 
+;;; Commentary:
+;;
+;; http request in org-mode babel
+;;
+
 ;;; Code:
 (require 'org)
 (require 'ob)
 (require 's)
 (require 'json)
-(require 'http-mode)
+(require 'ob-http-mode)
 
 (defgroup ob-http nil
   "org-mode blocks for http request"
@@ -58,7 +63,8 @@
 
 (defun ob-http/pretty (str content-type)
   (let ((type (if content-type (parse-content-type content-type) "json")))
-    (cond ((string= "json" type) (ob-http/pretty-json str)))))
+    (cond ((string= "json" type) (ob-http/pretty-json str))
+          (t str))))
 
 (defun org-babel-execute:http (body params)
   (let* ((req (ob-http/parse-input body))
@@ -93,6 +99,9 @@
         (ob-http/pretty result-body (or (cdr pretty)
                                         (cdr (assoc "content-type" result-headers))))
       result)))
+
+(eval-after-load "org"
+  '(add-to-list 'org-src-lang-modes '("http" . "ob-http")))
 
 (provide 'ob-http)
 ;;; ob-http.el ends here
