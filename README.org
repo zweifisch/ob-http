@@ -1,6 +1,7 @@
 * ob-http
   
-requires curl
+http request in org-mode babel, requires curl
+
 
 : #+BEGIN_SRC http :pretty
 : GET https://api.github.com/repos/zweifisch/ob-http/languages
@@ -14,15 +15,13 @@ requires curl
 
 ** options
 
-currently only json is supported
-
-| option        | curl           | example                                                   |
-|---------------+----------------+-----------------------------------------------------------|
-| =:proxy=      | =-x=           | =:proxy localhost:8118=                                   |
-| =:pretty=     | N/A            | =:pretty= use =Content-Type=, to overwrite =:pretty json= |
-| =:cookie-jar= | =--cookie-jar= | =:cookie-jar username=                                    |
-| =:cookie=     | =--cookie=     | =:cookie username=                                        |
-| =:max-time=   | =--max-time=   | default is =10=                                           |
+| option        | curl           | example                                                                                     |
+|---------------+----------------+---------------------------------------------------------------------------------------------|
+| =:proxy=      | =-x=           | =:proxy localhost:8118=                                                                     |
+| =:pretty=     | N/A            | =:pretty= use =Content-Type=, currently only json is supported, to overwrite =:pretty json= |
+| =:cookie-jar= | =--cookie-jar= | =:cookie-jar username=                                                                      |
+| =:cookie=     | =--cookie=     | =:cookie username=                                                                          |
+| =:max-time=   | =--max-time=   | default is =10=                                                                             |
 
 ** examples
    
