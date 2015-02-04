@@ -74,8 +74,17 @@
         (buffer-string))
     str))
 
+(defun ob-http/alist-key-to-string (pair)
+  `(,(symbol-name (car pair)) . ,(cdr pair)))
+
+(defun org-babel-expand-body:http (body params)
+  (s-format body 'aget
+            (mapcar 'ob-http/alist-key-to-string
+             (mapcar #'cdr (org-babel-get-header params :var)))))
+
 (defun org-babel-execute:http (body params)
-  (let* ((req (ob-http/parse-input body))
+  (let* ((body (org-babel-expand-body:http body params))
+         (req (ob-http/parse-input body))
          (proxy (cdr (assoc :proxy params)))
          (pretty (assoc :pretty params))
          (pretty-format (if pretty (cdr pretty)))
