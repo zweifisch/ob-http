@@ -66,6 +66,14 @@
     (cond ((string= "json" type) (ob-http/pretty-json str))
           (t str))))
 
+(defun ob-http/select (str path)
+  (if (executable-find "jq")
+      (with-temp-buffer
+        (insert str)
+        (shell-command-on-region (point-min) (point-max) (format "jq -r \"%s\"" path) nil 't)
+        (buffer-string))
+    str))
+
 (defun org-babel-execute:http (body params)
   (let* ((req (ob-http/parse-input body))
          (proxy (cdr (assoc :proxy params)))
@@ -74,6 +82,7 @@
          (cookie-jar (cdr (assoc :cookie-jar params)))
          (cookie (cdr (assoc :cookie params)))
          (max-time (cdr (assoc :max-time params)))
+         (select (cdr (assoc :select params)))
          (body (ob-http/request-body req))
          (cmd (s-format "curl -is ${proxy} ${method} ${headers} ${cookie-jar} ${cookie} ${body} \"${url}\" --max-time ${max-time}" 'aget
                         `(("proxy" . ,(if proxy (format "-x %s" proxy) ""))
@@ -93,12 +102,13 @@
          (result (shell-command-to-string cmd))
          (header-body (ob-http/split-header-body result))
          (result-headers (mapcar 'parse-header (s-lines (car header-body))))
-         (result-body (cadr header-body)))
+         (result-body (if pretty (ob-http/pretty (cadr header-body)
+                                                 (or (cdr pretty)
+                                                     (cdr (assoc "content-type" result-headers))))))
+         (result-body (if select (ob-http/select (or result-body (cadr header-body)) select)
+                        result-body)))
     (message cmd)
-    (if pretty
-        (ob-http/pretty result-body (or (cdr pretty)
-                                        (cdr (assoc "content-type" result-headers))))
-      result)))
+    (if result-body result-body result)))
 
 (eval-after-load "org"
   '(add-to-list 'org-src-lang-modes '("http" . "ob-http")))
