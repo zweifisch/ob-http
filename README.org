@@ -1,5 +1,7 @@
 * ob-http
-  
+
+[[http://melpa.org/#/ob-http][file:http://melpa.org/packages/ob-http-badge.svg]]
+
 http request in org-mode babel, requires curl
 
 
@@ -18,13 +20,29 @@ http request in org-mode babel, requires curl
 | option        | curl           | example                                                                                     |
 |---------------+----------------+---------------------------------------------------------------------------------------------|
 | =:proxy=      | =-x=           | =:proxy localhost:8118=                                                                     |
-| =:pretty=     | N/A            | =:pretty= use =Content-Type=, currently only json is supported, to overwrite =:pretty json= |
 | =:cookie-jar= | =--cookie-jar= | =:cookie-jar username=                                                                      |
 | =:cookie=     | =--cookie=     | =:cookie username=                                                                          |
 | =:max-time=   | =--max-time=   | default is =10=                                                                             |
+| =:pretty=     | N/A            | =:pretty= use =Content-Type=, currently only json is supported, to overwrite =:pretty json= |
+| =:select=     | N/A            | =:select .path= path will be passed to =jq=                                                 |
+| =:get-header= | N/A            | =:get-header X-Subject-Token=                                                               |
 
 ** examples
    
+**** set arbitary header
+
+: #+BEGIN_SRC http :pretty
+: GET http://httpbin.org/user-agent
+: User-Agent: ob-http
+: #+END_SRC
+: 
+: #+RESULTS:
+: : {
+: :   "user-agent": "ob-http"
+: : }
+
+**** json
+
 : #+BEGIN_SRC http :pretty
 : POST http://httpbin.org/post
 : Content-Type: application/json
@@ -55,15 +73,7 @@ http request in org-mode babel, requires curl
 : }
 : #+end_example
 
-: #+BEGIN_SRC http :pretty
-: GET http://httpbin.org/user-agent
-: User-Agent: ob-http
-: #+END_SRC
-: 
-: #+RESULTS:
-: : {
-: :   "user-agent": "ob-http"
-: : }
+**** form submit
 
 : #+BEGIN_SRC http :pretty
 : PATCH http://httpbin.org/patch
@@ -93,4 +103,28 @@ http request in org-mode babel, requires curl
 :   "args": {}
 : }
 : #+end_example
+
+**** variable
+     
+: #+HEADER: :var name="ob-http"
+: #+HEADER: :var password="secret"
+: #+BEGIN_SRC http :select .json
+: POST http://httpbin.org/post
+: Content-Type: application/json
+: 
+: {
+:     "auth": {
+:         "name": "${name}",
+:         "password": "${password}"
+:     }
+: }
+: #+END_SRC
+: 
+: #+RESULTS:
+: : {
+: :   "auth": {
+: :     "password": "secret",
+: :     "name": "ob-http"
+: :   }
+: : }
 
