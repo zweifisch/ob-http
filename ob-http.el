@@ -82,12 +82,16 @@
             (mapcar 'ob-http/alist-key-to-string
              (mapcar #'cdr (org-babel-get-header params :var)))))
 
+(defun ob-http/get-header (headers header)
+  (cdr (assoc (s-downcase header) headers)))
+
 (defun org-babel-execute:http (body params)
   (let* ((body (org-babel-expand-body:http body params))
          (req (ob-http/parse-input body))
          (proxy (cdr (assoc :proxy params)))
          (pretty (assoc :pretty params))
          (pretty-format (if pretty (cdr pretty)))
+         (get-header (cdr (assoc :get-header params)))
          (cookie-jar (cdr (assoc :cookie-jar params)))
          (cookie (cdr (assoc :cookie params)))
          (max-time (cdr (assoc :max-time params)))
@@ -114,10 +118,11 @@
          (result-body (if pretty (ob-http/pretty (cadr header-body)
                                                  (or (cdr pretty)
                                                      (cdr (assoc "content-type" result-headers))))))
-         (result-body (if select (ob-http/select (or result-body (cadr header-body)) select)
-                        result-body)))
+         (result-body (if select (ob-http/select (cadr header-body) select)
+                        result-body))
+         (result-header (if get-header (ob-http/get-header result-headers get-header))))
     (message cmd)
-    (if result-body result-body result)))
+    (if get-header result-header (if result-body result-body result))))
 
 (eval-after-load "org"
   '(add-to-list 'org-src-lang-modes '("http" . "ob-http")))
