@@ -15,6 +15,17 @@ http request in org-mode babel, requires curl
 : :   "Emacs Lisp": 5021
 : : }
 
+** setup
+
+To use =ob-babel= in an =org-babel= source block, the http language must be enabled in the custom =org-babel-load-languages= alist. Alternatively, running the following snippet during initialization will enable the mode.
+
+#+BEGIN_SRC emacs-lisp
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (http . t)))
+#+END_SRC
+
 ** options
 
 | option        | curl           | example                                                                                     |
@@ -127,4 +138,3 @@ http request in org-mode babel, requires curl
 : :     "name": "ob-http"
 : :   }
 : : }
-
