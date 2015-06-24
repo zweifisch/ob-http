@@ -105,7 +105,7 @@
          (max-time (cdr (assoc :max-time params)))
          (select (cdr (assoc :select params)))
          (body (ob-http/request-body req))
-         (cmd (s-format "curl -is ${proxy} ${method} ${headers} ${cookie-jar} ${cookie} ${body} \"${url}\" --max-time ${max-time}" 'aget
+         (cmd (s-format "curl -is ${proxy} ${method} ${headers} ${cookie-jar} ${cookie} ${body} \"${url}\" --max-time ${max-time} | tr -d '\r'" 'aget
                         `(("proxy" . ,(if proxy (format "-x %s" proxy) ""))
                           ("method" . ,(let ((method (ob-http/request-method req)))
                                          (if (string= "HEAD" method) "-I" (format "-X %s" method))))
