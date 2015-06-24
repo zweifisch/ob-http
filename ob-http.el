@@ -28,6 +28,11 @@
   :group 'ob-http
   :type 'integer)
 
+(defcustom ob-http:remove-cr nil
+  "remove carriage return from header"
+  :group 'ob-http
+  :type 'boolean)
+
 (defstruct ob-http/request method url headers body)
 
 (defun ob-http/parse-input (input)
@@ -85,6 +90,9 @@
 (defun ob-http/get-header (headers header)
   (cdr (assoc (s-downcase header) headers)))
 
+(defun ob-http/remove-carriage-return (header-body)
+  (list (s-join "\n" (s-lines (car header-body))) (cadr header-body)))
+
 (defun org-babel-execute:http (body params)
   (let* ((body (org-babel-expand-body:http body params))
          (req (ob-http/parse-input body))
@@ -120,7 +128,8 @@
                                                      (cdr (assoc "content-type" result-headers))))))
          (result-body (if select (ob-http/select (cadr header-body) select)
                         result-body))
-         (result-header (if get-header (ob-http/get-header result-headers get-header))))
+         (result-header (if get-header (ob-http/get-header result-headers get-header)))
+         (result (if ob-http:remove-cr (s-join "\n\n" (ob-http/remove-carriage-return header-body)) result)))
     (message cmd)
     (if get-header result-header (if result-body result-body result))))
 
