@@ -138,3 +138,39 @@ To use =ob-babel= in an =org-babel= source block, the http language must be enab
 : :     "name": "ob-http"
 : :   }
 : : }
+
+**** use properties
+
+: * api test
+: 
+: :PROPERTIES:
+: :var: url="http://httpbin.org" token="secret"
+: :pretty: json
+: :END:
+: 
+: #+BEGIN_SRC http
+: POST ${url}/post
+: Content-Type: application/json
+: X-Auth-Token: ${token}
+: #+END_SRC
+: 
+: #+RESULTS:
+: #+begin_example
+: {
+:   "args": {},
+:   "data": "",
+:   "files": {},
+:   "form": {},
+:   "headers": {
+:     "Accept": "*/*",
+:     "Content-Type": "application/json",
+:     "Host": "httpbin.org",
+:     "User-Agent": "curl/7.35.0",
+:     "X-Auth-Token": "secret"
+:   },
+:   "json": null,
+:   "origin": "*.*.*.*",
+:   "url": "http://httpbin.org/post"
+: }
+: #+end_example
+

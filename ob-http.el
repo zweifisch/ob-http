@@ -19,6 +19,12 @@
 (require 'json)
 (require 'ob-http-mode)
 
+(defconst org-babel-header-args:http
+  '((pretty . :any)
+    (proxy . :any)
+    (max-time . :any))
+  "http header arguments")
+
 (defgroup ob-http nil
   "org-mode blocks for http request"
   :group 'org)
