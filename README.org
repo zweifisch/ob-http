@@ -1,6 +1,7 @@
 * ob-http
 
 [[http://melpa.org/#/ob-http][file:http://melpa.org/packages/ob-http-badge.svg]]
+[[http://stable.melpa.org/#/ob-http][file:http://stable.melpa.org/packages/ob-http-badge.svg]]
 
 http request in org-mode babel, requires curl
 
@@ -12,7 +13,7 @@ http request in org-mode babel, requires curl
 : 
 : #+RESULTS:
 : : {
-: :   "Emacs Lisp": 5021
+: :   "Emacs Lisp": 8170
 : : }
 
 ** setup
