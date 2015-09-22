@@ -22,6 +22,12 @@
 (defconst org-babel-header-args:http
   '((pretty . :any)
     (proxy . :any)
+    (cookie . :any)
+    (schema . :any)
+    (host . :any)
+    (port . :any)
+    (username . :any)
+    (password . :any)
     (max-time . :any))
   "http header arguments")
 
@@ -123,6 +129,21 @@
    (t
     (append (ob-http/flatten (car l)) (ob-http/flatten (cdr l))))))
 
+(defun ob-http/aget (key alist)
+  (aget alist (intern key)))
+
+(defun ob-http/construct-url (path params)
+  (if (s-starts-with? "/" path)
+      (s-concat
+       (format "%s://" (or (aget params :schema) "http"))
+       (when (and (aget params :username) (aget params :password))
+         (s-format "${:username}:${:password}@" 'ob-http/aget params))
+       (aget params :host)
+       (when (aget params :port)
+             (s-concat ":" (aget params :port)))
+       path)
+    path))
+
 (defun org-babel-execute:http (body params)
   (let* ((request (ob-http/parse-request (org-babel-expand-body:http body params)))
          (proxy (cdr (assoc :proxy params)))
@@ -147,7 +168,7 @@
                      "--max-time"
                      (int-to-string (or (cdr (assoc :max-time params))
                                         ob-http:max-time))
-                     (ob-http/request-url request))))
+                     (ob-http/construct-url (ob-http/request-url request) params))))
     (with-current-buffer (get-buffer-create "*curl output*")
       (erase-buffer)
       (if (= 0 (apply 'call-process "curl" nil `(t ,error-output) nil (ob-http/flatten args)))
