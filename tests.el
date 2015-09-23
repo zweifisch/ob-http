@@ -16,7 +16,7 @@
                    "http://local")))
 
   (let ((params '((:host . "localhost")
-                  (:port . "8080")
+                  (:port . 8080)
                   (:schema . "https"))))
     (should (equal (ob-http-construct-url "/" params)
                    "https://localhost:8080/"))))

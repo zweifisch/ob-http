@@ -140,7 +140,7 @@
          (s-format "${:username}:${:password}@" 'ob-http-aget params))
        (aget params :host)
        (when (aget params :port)
-             (s-concat ":" (aget params :port)))
+             (format ":%s" (aget params :port)))
        path)
     path))
 
