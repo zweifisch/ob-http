@@ -130,7 +130,7 @@
     (append (ob-http-flatten (car l)) (ob-http-flatten (cdr l))))))
 
 (defun ob-http-aget (key alist)
-  (aget alist (intern key)))
+  (assoc-default (intern key) alist))
 
 (defun ob-http-construct-url (path params)
   (if (s-starts-with? "/" path)
