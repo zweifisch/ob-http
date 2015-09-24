@@ -5,7 +5,7 @@
 ;; Author: ZHOU Feng <zf.pascal@gmail.com>
 ;; URL: http://github.com/zweifisch/ob-http
 ;; Version: 0.0.1
-;; Package-Requires: ((s "1.9.0"))
+;; Package-Requires: ((s "1.9.0") (cl-lib "0.5"))
 
 ;;; Commentary:
 ;;
@@ -18,6 +18,7 @@
 (require 's)
 (require 'json)
 (require 'ob-http-mode)
+(require 'cl-lib)
 
 (defconst org-babel-header-args:http
   '((pretty . :any)
@@ -45,8 +46,8 @@
   :group 'ob-http
   :type 'boolean)
 
-(defstruct ob-http-request method url headers body)
-(defstruct ob-http-response headers body headers-map)
+(cl-defstruct ob-http-request method url headers body)
+(cl-defstruct ob-http-response headers body headers-map)
 
 (defun ob-http-parse-request (input)
   (let* ((headers-body (ob-http-split-header-body input))
