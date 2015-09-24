@@ -17,7 +17,7 @@ http request in org-mode babel, requires curl
 
 ** setup
 
-To use =ob-babel= in an =org-babel= source block, the http language must be enabled in the custom =org-babel-load-languages= alist. Alternatively, running the following snippet during initialization will enable the mode.
+To use =ob-http= in an =org-babel= source block, the http language must be enabled in the custom =org-babel-load-languages= alist. Alternatively, running the following snippet during initialization will enable the mode.
 
 #+BEGIN_SRC emacs-lisp
   (org-babel-do-load-languages
