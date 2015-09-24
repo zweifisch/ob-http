@@ -106,13 +106,9 @@
         (buffer-string))
     str))
 
-(defun ob-http-alist-key-to-string (pair)
-  `(,(symbol-name (car pair)) . ,(cdr pair)))
-
 (defun org-babel-expand-body:http (body params)
-  (s-format body 'aget
-            (mapcar 'ob-http-alist-key-to-string
-             (mapcar #'cdr (org-babel-get-header params :var)))))
+  (s-format body 'ob-http-aget
+            (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun ob-http-get-response-header (response header)
   (cdr (assoc (s-downcase header) (ob-http-response-headers-map response))))
@@ -135,12 +131,12 @@
 (defun ob-http-construct-url (path params)
   (if (s-starts-with? "/" path)
       (s-concat
-       (format "%s://" (or (aget params :schema) "http"))
-       (when (and (aget params :username) (aget params :password))
+       (format "%s://" (or (assoc-default :schema params) "http"))
+       (when (and (assoc :username params) (assoc :password params))
          (s-format "${:username}:${:password}@" 'ob-http-aget params))
-       (aget params :host)
-       (when (aget params :port)
-             (format ":%s" (aget params :port)))
+       (assoc-default :host params)
+       (when (assoc :port params)
+             (format ":%s" (assoc-default :port params)))
        path)
     path))
 
