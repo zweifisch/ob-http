@@ -145,6 +145,7 @@
   (let* ((request (ob-http-parse-request (org-babel-expand-body:http body params)))
          (proxy (cdr (assoc :proxy params)))
          (pretty (assoc :pretty params))
+         (prettify (and pretty (not (string= (cdr pretty) "no"))))
          (get-header (cdr (assoc :get-header params)))
          (cookie-jar (cdr (assoc :cookie-jar params)))
          (cookie (cdr (assoc :cookie params)))
@@ -170,11 +171,11 @@
       (erase-buffer)
       (if (= 0 (apply 'call-process "curl" nil `(t ,error-output) nil (ob-http-flatten args)))
           (let ((response (ob-http-parse-response (buffer-string))))
-            (when pretty (ob-http-pretty-response response (cdr pretty)))
+            (when prettify (ob-http-pretty-response response (cdr pretty)))
             (when ob-http:remove-cr (ob-http-remove-carriage-return response))
             (cond (get-header (ob-http-get-response-header response get-header))
                   (select (ob-http-select (ob-http-response-body response) select))
-                  (pretty (ob-http-response-body response))
+                  (prettify (ob-http-response-body response))
                   (t (s-join "\n\n" (list (ob-http-response-headers response) (ob-http-response-body response))))))
         (with-output-to-temp-buffer "*curl error"
           (princ (with-temp-buffer
