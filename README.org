@@ -35,7 +35,7 @@ To use =ob-http= in an =org-babel= source block, the http language must be enabl
 | =:cookie=     | =--cookie=     | =:cookie username=                                                                          |
 | =:max-time=   | =--max-time=   | default is =10=                                                                             |
 | =:pretty=     | N/A            | =:pretty= use =Content-Type=, currently only json is supported, to overwrite =:pretty json= |
-| =:select=     | N/A            | =:select .path= path will be passed to =jq=                                                 |
+| =:select=     | N/A            | =:select path= path will be passed to [[https://stedolan.github.io/jq/][jq]] for json or [[https://github.com/EricChiang/pup][pup]] for html                           |
 | =:get-header= | N/A            | =:get-header X-Subject-Token=                                                               |
 
 ** examples

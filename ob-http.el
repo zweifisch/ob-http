@@ -86,11 +86,13 @@
     `(,(s-downcase (car key-value)) . ,(cadr key-value))))
 
 (defun ob-http-parse-content-type (content-type)
-  (if (s-contains? "json" content-type) "json" nil))
+  (cond
+   ((string-match "json" content-type) 'json)
+   ((string-match "html" content-type) 'html)))
 
 (defun ob-http-pretty (body content-type)
-  (let ((type (if content-type (ob-http-parse-content-type content-type) "json")))
-    (cond ((string= "json" type) (ob-http-pretty-json body))
+  (let ((type (if content-type (ob-http-parse-content-type content-type) 'json)))
+    (cond ((eq 'json type) (ob-http-pretty-json body))
           (t body))))
 
 (defun ob-http-pretty-response (response content-type)
@@ -99,13 +101,22 @@
                         (or content-type
                             (ob-http-get-response-header response "content-type")))))
 
-(defun ob-http-select (str path)
-  (if (executable-find "jq")
+(defun ob-http-select (response path)
+  (let ((content-type (ob-http-parse-content-type
+                       (ob-http-get-response-header response "content-type")))
+        (body (ob-http-response-body response)))
+    (cond
+     ((and (eq 'json content-type) (executable-find "jq"))
       (with-temp-buffer
-        (insert str)
+        (insert body)
         (shell-command-on-region (point-min) (point-max) (format "jq -r \"%s\"" path) nil 't)
-        (buffer-string))
-    str))
+        (buffer-string)))
+     ((and (eq 'html content-type) (executable-find "pup"))
+      (with-temp-buffer
+        (insert body)
+        (shell-command-on-region (point-min) (point-max) (format "pup -p \"%s\"" path) nil 't)
+        (buffer-string)))
+     (t body))))
 
 (defun org-babel-expand-body:http (body params)
   (s-format body 'ob-http-aget
@@ -174,7 +185,7 @@
             (when prettify (ob-http-pretty-response response (cdr pretty)))
             (when ob-http:remove-cr (ob-http-remove-carriage-return response))
             (cond (get-header (ob-http-get-response-header response get-header))
-                  (select (ob-http-select (ob-http-response-body response) select))
+                  (select (ob-http-select response select))
                   (prettify (ob-http-response-body response))
                   (t (s-join "\n\n" (list (ob-http-response-headers response) (ob-http-response-body response))))))
         (with-output-to-temp-buffer "*curl error"
