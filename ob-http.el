@@ -70,17 +70,6 @@
 (defun ob-http-split-header-body (input)
   (s-split-up-to "\\(\r\n\\|[\n\r]\\)[ \t]*\\1" input 1))
 
-(defun ob-http-pretty-json (str)
-  (if (executable-find "jq")
-      (with-temp-buffer
-        (insert str)
-        (shell-command-on-region (point-min) (point-max) "jq -r ." nil 't)
-        (buffer-string))
-    (with-temp-buffer
-      (insert str)
-      (json-pretty-print-buffer)
-      (buffer-string))))
-
 (defun ob-http-parse-header (line)
   (let ((key-value (s-split-up-to ": " line 1)))
     `(,(s-downcase (car key-value)) . ,(cadr key-value))))
@@ -88,18 +77,50 @@
 (defun ob-http-parse-content-type (content-type)
   (cond
    ((string-match "json" content-type) 'json)
-   ((string-match "html" content-type) 'html)))
+   ((string-match "html" content-type) 'html)
+   ((string-match "xml" content-type) 'xml)))
+
+(defun ob-http-shell-command-to-string (command input)
+  (with-temp-buffer
+    (insert input)
+    (shell-command-on-region (point-min) (point-max) command nil 't)
+    (buffer-string)))
+
+(defun ob-http-pretty-json (str)
+  (if (executable-find "jq")
+      (ob-http-shell-command-to-string "jq -r ." str)
+    (with-temp-buffer
+      (insert str)
+      (json-pretty-print-buffer)
+      (buffer-string))))
+
+(defun ob-http-pretty-xml (str)
+  (cond
+   ((executable-find "xml_pp") (ob-http-shell-command-to-string "xml_pp" str))
+   ((executable-find "xmlstarlet") (ob-http-shell-command-to-string "xmlstarlet fo" str))
+   (t str)))
+
+(defun ob-http-pretty-html (str)
+  (cond
+   ((executable-find "tidy") (ob-http-shell-command-to-string "tidy -i -raw -q 2> /dev/null" str))
+   ((executable-find "pup") (ob-http-shell-command-to-string "pup -p" str))
+   (t str)))
 
 (defun ob-http-pretty (body content-type)
-  (let ((type (if content-type (ob-http-parse-content-type content-type) 'json)))
-    (cond ((eq 'json type) (ob-http-pretty-json body))
-          (t body))))
+  (if (string= "" body)
+      body
+    (case (ob-http-parse-content-type content-type)
+      (json (ob-http-pretty-json body))
+      (xml (ob-http-pretty-xml body))
+      (html (ob-http-pretty-html body))
+      (otherwise body))))
 
 (defun ob-http-pretty-response (response content-type)
   (setf (ob-http-response-body response)
         (ob-http-pretty (ob-http-response-body response)
-                        (or content-type
-                            (ob-http-get-response-header response "content-type")))))
+                        (if (member content-type '("yes" nil))
+                            (ob-http-get-response-header response "content-type")
+                          content-type))))
 
 (defun ob-http-select (response path)
   (let ((content-type (ob-http-parse-content-type
@@ -107,15 +128,11 @@
         (body (ob-http-response-body response)))
     (cond
      ((and (eq 'json content-type) (executable-find "jq"))
-      (with-temp-buffer
-        (insert body)
-        (shell-command-on-region (point-min) (point-max) (format "jq -r \"%s\"" path) nil 't)
-        (buffer-string)))
+      (ob-http-shell-command-to-string (format "jq -r \"%s\"" path) body))
      ((and (eq 'html content-type) (executable-find "pup"))
-      (with-temp-buffer
-        (insert body)
-        (shell-command-on-region (point-min) (point-max) (format "pup -p \"%s\"" path) nil 't)
-        (buffer-string)))
+      (ob-http-shell-command-to-string (format "pup -p \"%s\"" path) body))
+     ((and (eq 'xml content-type) (executable-find "xmlstarlet"))
+      (ob-http-shell-command-to-string (format "xmlstarlet sel -t -c '%s' | xmlstarlet fo -o" path) body))
      (t body))))
 
 (defun org-babel-expand-body:http (body params)
