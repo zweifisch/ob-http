@@ -29,6 +29,7 @@
     (port . :any)
     (username . :any)
     (password . :any)
+    (follow-redirect . :any)
     (max-time . :any))
   "http header arguments")
 
@@ -68,7 +69,11 @@
      :headers-map headers-map)))
 
 (defun ob-http-split-header-body (input)
-  (s-split-up-to "\\(\r\n\\|[\n\r]\\)[ \t]*\\1" input 1))
+  (let ((splited (s-split-up-to "\\(\r\n\\|[\n\r]\\)[ \t]*\\1" input 1)))
+    (if (and (string-match "^HTTP/1.[0-1] 30" (car splited))
+             (string-match "^HTTP/1.[0-1]" (cadr splited)))
+        (ob-http-split-header-body (cadr splited))
+      splited)))
 
 (defun ob-http-parse-header (line)
   (let ((key-value (s-split-up-to ": " line 1)))
@@ -172,6 +177,7 @@
 (defun org-babel-execute:http (body params)
   (let* ((request (ob-http-parse-request (org-babel-expand-body:http body params)))
          (proxy (cdr (assoc :proxy params)))
+         (follow-redirect (and (assoc :follow-redirect params) (not (string= "no" (cdr (assoc :follow-redirect params))))))
          (pretty (assoc :pretty params))
          (prettify (and pretty (not (string= (cdr pretty) "no"))))
          (get-header (cdr (assoc :get-header params)))
@@ -184,6 +190,7 @@
                      (when proxy `("-x" ,proxy))
                      (let ((method (ob-http-request-method request)))
                        (if (string= "HEAD" method) "-I" `("-X" ,method)))
+                     (when follow-redirect "-L")
                      (mapcar (lambda (x) `("-H" ,x)) (ob-http-request-headers request))
                      (when (s-present? request-body)
                        (let ((tmp (org-babel-temp-file "http-")))
