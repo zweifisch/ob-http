@@ -47,7 +47,7 @@
   :group 'ob-http
   :type 'boolean)
 
-(defcustom ob-http:curl-custom-headers nil
+(defcustom ob-http:curl-custom-arguments nil
   "List of custom headers that shall be added to each curl request"
   :group 'ob-http
   :type '(repeat (string :format "%v")))
@@ -191,7 +191,7 @@
          (select (cdr (assoc :select params)))
          (request-body (ob-http-request-body request))
          (error-output (org-babel-temp-file "curl-error"))
-         (args (append ob-http:curl-custom-headers (list "-i"
+         (args (append ob-http:curl-custom-arguments (list "-i"
                      (when proxy `("-x" ,proxy))
                      (let ((method (ob-http-request-method request)))
                        (if (string= "HEAD" method) "-I" `("-X" ,method)))
