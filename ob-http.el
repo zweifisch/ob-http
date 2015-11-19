@@ -147,7 +147,7 @@
 
 (defun org-babel-expand-body:http (body params)
   (s-format body 'ob-http-aget
-            (mapcar #'cdr (org-babel-get-header params :var))))
+            (mapcar (lambda (x) (when (eq (car x) :var) (cdr x))) params)))
 
 (defun ob-http-get-response-header (response header)
   (cdr (assoc (s-downcase header) (ob-http-response-headers-map response))))
