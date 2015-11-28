@@ -23,6 +23,7 @@
 (defconst org-babel-header-args:http
   '((pretty . :any)
     (proxy . :any)
+    (curl . :any)
     (cookie . :any)
     (schema . :any)
     (host . :any)
@@ -188,6 +189,7 @@
          (get-header (cdr (assoc :get-header params)))
          (cookie-jar (cdr (assoc :cookie-jar params)))
          (cookie (cdr (assoc :cookie params)))
+         (curl (cdr (assoc :curl params)))
          (select (cdr (assoc :select params)))
          (request-body (ob-http-request-body request))
          (error-output (org-babel-temp-file "curl-error"))
@@ -203,6 +205,7 @@
                          `("-d" ,(format "@%s" tmp))))
                      (when cookie-jar `("--cookie-jar" ,cookie-jar))
                      (when cookie `("--cookie" ,cookie))
+                     (when curl (split-string-and-unquote curl))
                      "--max-time"
                      (int-to-string (or (cdr (assoc :max-time params))
                                         ob-http:max-time))
