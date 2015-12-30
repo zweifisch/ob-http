@@ -44,6 +44,7 @@
     (username . :any)
     (password . :any)
     (follow-redirect . :any)
+    (path-prefix . :any)
     (max-time . :any))
   "http header arguments")
 
@@ -126,6 +127,7 @@
 
 (defun ob-http-pretty-html (str)
   (cond
+   ((executable-find "elinks") (ob-http-shell-command-to-string "elinks -dump" str))
    ((executable-find "tidy") (ob-http-shell-command-to-string "tidy -i -raw -q 2> /dev/null" str))
    ((executable-find "pup") (ob-http-shell-command-to-string "pup -p" str))
    (t str)))
@@ -190,6 +192,7 @@
        (assoc-default :host params)
        (when (assoc :port params)
              (format ":%s" (assoc-default :port params)))
+       (assoc-default :path-prefix params)
        path)
     path))
 
