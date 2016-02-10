@@ -186,3 +186,12 @@ supported headers:
 : }
 : #+end_example
 
+**** files
+
+: #+BEGIN_SRC http :file zweifisch.jpeg
+: GET https://avatars.githubusercontent.com/u/447862?v=3
+: #+END_SRC
+
+: #+RESULTS:
+: [[file:zweifisch.jpeg]]
+

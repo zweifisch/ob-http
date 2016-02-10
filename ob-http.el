@@ -196,12 +196,18 @@
        path)
     path))
 
+(defun ob-http-file (response filename)
+  (let ((body (ob-http-response-body response)))
+    (with-temp-file filename
+      (insert body))))
+
 (defun org-babel-execute:http (body params)
   (let* ((request (ob-http-parse-request (org-babel-expand-body:http body params)))
          (proxy (cdr (assoc :proxy params)))
          (follow-redirect (and (assoc :follow-redirect params) (not (string= "no" (cdr (assoc :follow-redirect params))))))
          (pretty (assoc :pretty params))
          (prettify (and pretty (not (string= (cdr pretty) "no"))))
+         (file (assoc :file params))
          (get-header (cdr (assoc :get-header params)))
          (cookie-jar (cdr (assoc :cookie-jar params)))
          (cookie (cdr (assoc :cookie params)))
@@ -235,6 +241,7 @@
             (cond (get-header (ob-http-get-response-header response get-header))
                   (select (ob-http-select response select))
                   (prettify (ob-http-response-body response))
+                  (file (ob-http-file response (cdr file)))
                   (t (s-join "\n\n" (list (ob-http-response-headers response) (ob-http-response-body response))))))
         (with-output-to-temp-buffer "*curl error"
           (princ (with-temp-buffer
