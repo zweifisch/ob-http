@@ -243,7 +243,7 @@
                   (prettify (ob-http-response-body response))
                   (file (ob-http-file response (cdr file)))
                   (t (s-join "\n\n" (list (ob-http-response-headers response) (ob-http-response-body response))))))
-        (with-output-to-temp-buffer "*curl error"
+        (with-output-to-temp-buffer "*curl error*"
           (princ (with-temp-buffer
                    (insert-file-contents-literally error-output)
                    (s-join "\n" (s-lines (buffer-string)))))
