@@ -36,6 +36,7 @@
 (defconst org-babel-header-args:http
   '((pretty . :any)
     (proxy . :any)
+    (noproxy . :any)
     (curl . :any)
     (cookie . :any)
     (schema . :any)
@@ -204,6 +205,7 @@
 (defun org-babel-execute:http (body params)
   (let* ((request (ob-http-parse-request (org-babel-expand-body:http body params)))
          (proxy (cdr (assoc :proxy params)))
+         (noproxy (assoc :noproxy params))
          (follow-redirect (and (assoc :follow-redirect params) (not (string= "no" (cdr (assoc :follow-redirect params))))))
          (pretty (assoc :pretty params))
          (prettify (and pretty (not (string= (cdr pretty) "no"))))
@@ -216,7 +218,8 @@
          (request-body (ob-http-request-body request))
          (error-output (org-babel-temp-file "curl-error"))
          (args (append ob-http:curl-custom-arguments (list "-i"
-                     (when proxy `("-x" ,proxy))
+                     (when (and proxy (not noproxy)) `("-x" ,proxy))
+                     (when noproxy '("--noproxy" "'*'"))
                      (let ((method (ob-http-request-method request)))
                        (if (string= "HEAD" method) "-I" `("-X" ,method)))
                      (when follow-redirect "-L")
