@@ -219,7 +219,7 @@
          (error-output (org-babel-temp-file "curl-error"))
          (args (append ob-http:curl-custom-arguments (list "-i"
                      (when (and proxy (not noproxy)) `("-x" ,proxy))
-                     (when noproxy '("--noproxy" "'*'"))
+                     (when noproxy '("--noproxy" "*"))
                      (let ((method (ob-http-request-method request)))
                        (if (string= "HEAD" method) "-I" `("-X" ,method)))
                      (when follow-redirect "-L")
@@ -237,7 +237,8 @@
                      (ob-http-construct-url (ob-http-request-url request) params)))))
     (with-current-buffer (get-buffer-create "*curl commands history*")
       (goto-char (point-max))
-      (insert (concat "curl " (string-join (ob-http-flatten args) " ") "\n")))
+      (let ((cmd-line (concat "curl " (string-join (ob-http-flatten args) " ") "\n")))
+        (insert (replace-regexp-in-string "--noproxy \\*"  "--noproxy '*'" cmd-line))))
     (with-current-buffer (get-buffer-create "*curl output*")
       (erase-buffer)
       (if (= 0 (apply 'call-process "curl" nil `(t ,error-output) nil (ob-http-flatten args)))
