@@ -136,7 +136,7 @@
 (defun ob-http-pretty (body content-type)
   (if (string= "" body)
       body
-    (case (ob-http-parse-content-type content-type)
+    (cl-case (ob-http-parse-content-type content-type)
       (json (ob-http-pretty-json body))
       (xml (ob-http-pretty-xml body))
       (html (ob-http-pretty-html body))
