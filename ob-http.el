@@ -29,6 +29,7 @@
 (require 'org)
 (require 'ob)
 (require 's)
+(require 'subr-x)
 (require 'json)
 (require 'ob-http-mode)
 (require 'cl-lib)
