@@ -102,10 +102,11 @@
     `(,(s-downcase (car key-value)) . ,(cadr key-value))))
 
 (defun ob-http-parse-content-type (content-type)
-  (cond
-   ((string-match "json" content-type) 'json)
-   ((string-match "html" content-type) 'html)
-   ((string-match "xml" content-type) 'xml)))
+  (when content-type
+    (cond
+     ((string-match "json" content-type) 'json)
+     ((string-match "html" content-type) 'html)
+     ((string-match "xml" content-type) 'xml))))
 
 (defun ob-http-shell-command-to-string (command input)
   (with-temp-buffer
