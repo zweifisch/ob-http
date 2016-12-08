@@ -47,6 +47,7 @@
     (password . :any)
     (follow-redirect . :any)
     (path-prefix . :any)
+    (resolve . :any)
     (max-time . :any))
   "http header arguments")
 
@@ -217,6 +218,7 @@
          (cookie (cdr (assoc :cookie params)))
          (curl (cdr (assoc :curl params)))
          (select (cdr (assoc :select params)))
+         (resolve (cdr (assoc :resolve params)))
          (request-body (ob-http-request-body request))
          (error-output (org-babel-temp-file "curl-error"))
          (args (append ob-http:curl-custom-arguments (list "-i"
@@ -232,6 +234,7 @@
                          `("-d" ,(format "@%s" tmp))))
                      (when cookie-jar `("--cookie-jar" ,cookie-jar))
                      (when cookie `("--cookie" ,cookie))
+                     (when resolve (mapcar (lambda (x) `("--resolve" ,x)) (split-string resolve ",")))
                      (when curl (split-string-and-unquote curl))
                      "--max-time"
                      (int-to-string (or (cdr (assoc :max-time params))
