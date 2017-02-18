@@ -43,8 +43,9 @@
     (schema . :any)
     (host . :any)
     (port . :any)
-    (username . :any)
-    (password . :any)
+    (user . :any)
+    (username . :any)  ;; deprecated, use user instead
+    (password . :any)  ;; deprecated
     (follow-redirect . :any)
     (path-prefix . :any)
     (resolve . :any)
@@ -191,8 +192,6 @@
   (if (s-starts-with? "/" path)
       (s-concat
        (format "%s://" (or (assoc-default :schema params) "http"))
-       (when (and (assoc :username params) (assoc :password params))
-         (s-format "${:username}:${:password}@" 'ob-http-aget params))
        (assoc-default :host params)
        (when (assoc :port params)
              (format ":%s" (assoc-default :port params)))
@@ -227,6 +226,9 @@
                      (let ((method (ob-http-request-method request)))
                        (if (string= "HEAD" method) "-I" `("-X" ,method)))
                      (when follow-redirect "-L")
+                     (when (and (assoc :username params) (assoc :password params))
+                       `("--user" ,(s-format "${:username}:${:password}" 'ob-http-aget params)))
+                     (when (assoc :user params) `("--user" ,(cdr (assoc :user params))))
                      (mapcar (lambda (x) `("-H" ,x)) (ob-http-request-headers request))
                      (when (s-present? request-body)
                        (let ((tmp (org-babel-temp-file "http-")))
