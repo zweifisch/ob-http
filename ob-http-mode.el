@@ -30,20 +30,34 @@
                        Proxy-Authorization Range Referer TE User-Agent
                        Upgrade Via Warning))
              (ob-http-methods-regexp
-              (regexp-opt (mapcar 'symbol-name ob-http-methods) 'words))
+              (rx-to-string
+               `(seq
+                 bol
+                 (? (1+ space))
+                 (group-n 1 (or ,@(mapcar 'symbol-name ob-http-methods)))
+                 space
+                 (group-n 2 (1+ any))
+                 eol)))
              (ob-http-headers-regexp
-              (s-concat "^\\(" (s-join "\\|" (mapcar 'symbol-name ob-http-headers)) "\\): \\(.*\\)$"))
-             (ob-http-custome-headers-regexp
+              (rx-to-string
+               `(seq
+                 bol
+                 (? (1+ space))
+                 (group-n 1 (or ,@(mapcar 'symbol-name ob-http-headers)))
+                 ": "
+                 (group-n 2 (1+ any))
+                 eol)))
+             (ob-http-custom-headers-regexp
               "\\(^X-[^ :]+\\): \\(.*\\)$")
              (ob-http-variable-regexp
               "\\([^ ?&=\n]+\\)=\\([^&\n]*\\)")
              (ob-http-misc-regexp
               "\\(&\\|=\\|?\\|{\\|}\\|\\[\\|\\]\\|\\,\\|:\\)"))
         `((,ob-http-headers-regexp (1 font-lock-variable-name-face) (2 font-lock-string-face))
-          (,ob-http-custome-headers-regexp (1 font-lock-variable-name-face) (2 font-lock-string-face))
-          (,ob-http-misc-regexp (1 font-lock-comment-face))
+          (,ob-http-custom-headers-regexp (1 font-lock-variable-name-face) (2 font-lock-string-face))
           (,ob-http-variable-regexp (1 font-lock-variable-name-face) (2 font-lock-string-face))
-          (,ob-http-methods-regexp . font-lock-constant-face))))
+          (,ob-http-methods-regexp  (1 font-lock-constant-face) (2 font-lock-function-name-face))
+          (,ob-http-misc-regexp (1 font-lock-comment-face)))))
 
 (define-derived-mode ob-http-mode fundamental-mode "ob http"
   (set (make-local-variable 'font-lock-defaults) '(ob-http-mode-keywords)))
