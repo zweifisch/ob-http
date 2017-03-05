@@ -159,9 +159,7 @@ supported headers:
 
 : * api test
 : :PROPERTIES:
-: :var: token="secret"
-: :host: httpbin.org
-: :pretty: json
+: :header-args: :var token="secret" :host httpbin.org :pretty
 : :END:
 : 
 : #+BEGIN_SRC http
