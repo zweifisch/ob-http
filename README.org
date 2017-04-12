@@ -121,8 +121,9 @@ To use =ob-http= in an =org-babel= source block, the http language must be enabl
 
 **** variable
      
-: #+HEADER: :var name="ob-http"
-: #+HEADER: :var password="secret"
+: #+PROPERTY: header-args :var name="ob-http"
+: #+PROPERTY: header-args :var password="secret"
+
 : #+BEGIN_SRC http :select .json
 : POST http://httpbin.org/post
 : Content-Type: application/json
