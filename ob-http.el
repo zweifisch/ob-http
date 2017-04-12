@@ -26,7 +26,6 @@
 ;;
 
 ;;; Code:
-(require 'org)
 (require 'ob)
 (require 's)
 (require 'subr-x)
