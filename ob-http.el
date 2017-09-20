@@ -240,6 +240,7 @@
                      "--max-time"
                      (int-to-string (or (cdr (assoc :max-time params))
                                         ob-http:max-time))
+                     "--globoff"
                      (ob-http-construct-url (ob-http-request-url request) params)))))
     (with-current-buffer (get-buffer-create "*curl commands history*")
       (goto-char (point-max))
