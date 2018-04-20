@@ -263,6 +263,22 @@
                    (s-join "\n" (s-lines (buffer-string)))))
           "")))))
 
+(defun ob-http-export-expand-variables (&optional backend)
+  "Scan current buffer for all HTTP source code blocks and expand variables.
+
+Add this function to `org-export-before-processing-hook' to
+enable variable expansion before source block is exported."
+  (let ((case-fold-search t) elt replacement)
+    (save-excursion
+      (goto-char (point-min))
+      (while (search-forward-regexp "^[ \t]+#\\+begin_src[ \t]+http" nil 'noerror)
+        (setq elt (org-element-at-point))
+        (when (eq 'src-block (car elt))
+          (setq replacement (org-babel-expand-src-block))
+          (goto-char (org-element-property :begin elt))
+          (delete-region (org-element-property :begin elt) (org-element-property :end elt))
+          (insert (org-element-interpret-data (org-element-put-property elt :value replacement))))))))
+
 (eval-after-load "org"
   '(add-to-list 'org-src-lang-modes '("http" . "ob-http")))
 
