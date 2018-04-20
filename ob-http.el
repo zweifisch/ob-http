@@ -271,7 +271,7 @@ enable variable expansion before source block is exported."
   (let ((case-fold-search t) elt replacement)
     (save-excursion
       (goto-char (point-min))
-      (while (search-forward-regexp "^[ \t]+#\\+begin_src[ \t]+http" nil 'noerror)
+      (while (search-forward-regexp "^[ \t]*#\\+begin_src[ \t]+http" nil 'noerror)
         (setq elt (org-element-at-point))
         (when (eq 'src-block (car elt))
           (setq replacement (org-babel-expand-src-block))
