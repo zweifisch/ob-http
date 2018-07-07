@@ -244,8 +244,9 @@
                      (ob-http-construct-url (ob-http-request-url request) params)))))
     (with-current-buffer (get-buffer-create "*curl commands history*")
       (goto-char (point-max))
-      (let ((cmd-line (concat "curl " (string-join (ob-http-flatten args) " ") "\n")))
-        (insert (replace-regexp-in-string "--noproxy \\*"  "--noproxy '*'" cmd-line))))
+      (insert "curl "
+              (string-join (mapcar 'shell-quote-argument (ob-http-flatten args)) " ")
+              "\n"))
     (with-current-buffer (get-buffer-create "*curl output*")
       (erase-buffer)
       (if (= 0 (apply 'call-process "curl" nil `(t ,error-output) nil (ob-http-flatten args)))
