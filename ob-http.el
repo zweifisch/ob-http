@@ -93,7 +93,7 @@
 
 (defun ob-http-split-header-body (input)
   (let ((splited (s-split-up-to "\\(\r\n\\|[\n\r]\\)[ \t]*\\1" input 1)))
-    (if (and (string-match "^HTTP/\\(1.[0-1]\\|2\\) \\(30\\|100\\)" (car splited))
+    (if (and (string-match "^HTTP/\\(1.[0-1]\\|2\\) \\(30\\|100\\|200\\)" (car splited))
              (string-match "^HTTP/\\(1.[0-1]\\|2\\)" (cadr splited)))
         (ob-http-split-header-body (cadr splited))
       splited)))
