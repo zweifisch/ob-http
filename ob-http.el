@@ -281,7 +281,7 @@ enable variable expansion before source block is exported."
           (insert (org-element-interpret-data (org-element-put-property elt :value replacement))))))))
 
 (eval-after-load "org"
-  '(add-to-list 'org-src-lang-modes '("http" . "ob-http")))
+  '(add-to-list 'org-src-lang-modes '("http" . ob-http)))
 
 (provide 'ob-http)
 ;;; ob-http.el ends here
