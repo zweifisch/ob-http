@@ -16,7 +16,6 @@ http request in org-mode babel, requires curl
 : : }
 
 The resulting plain curl calls can be seen at =*curl commands history*= buffer.
-Or use the =:print-curl= option to only output the body as string instead.
 
 ** setup
 
