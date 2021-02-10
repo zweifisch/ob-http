@@ -15,6 +15,8 @@ http request in org-mode babel, requires curl
 : :   "Emacs Lisp": 8170
 : : }
 
+The resulting plain curl calls can be seen at =*curl commands history*= buffer.
+
 ** setup
 
 To use =ob-http= in an =org-babel= source block, the http language must be enabled in the custom =org-babel-load-languages= alist. Alternatively, running the following snippet during initialization will enable the mode.
@@ -35,12 +37,13 @@ To use =ob-http= in an =org-babel= source block, the http language must be enabl
 | =:cookie-jar= | =--cookie-jar= | =:cookie-jar username=                                                                  |
 | =:cookie=     | =--cookie=     | =:cookie username=                                                                      |
 | =:max-time=   | =--max-time=   | default is =10=                                                                         |
-| =:user=       | =--user=       | =:user admin:passwd=
+| =:user=       | =--user=       | =:user admin:passwd=                                                                    |
 | =:pretty=     | N/A            | =:pretty= use =Content-Type=, to overwrite =:pretty json=                               |
 | =:select=     | N/A            | =:select path= path will be passed to [[https://stedolan.github.io/jq/][jq]] for json or [[https://github.com/EricChiang/pup][pup]] for html or [[http://xmlstar.sourceforge.net/][xmlstarlet]] for xml |
 | =:get-header= | N/A            | =:get-header X-Subject-Token=                                                           |
 | =:curl=       | N/A            | =:curl --insecure --compressed= additional arguments for curl                           |
 | =:resolve=    | =--resolve=    | =:resolve example.com:80:127.0.0.1,example.com:443:127.0.0.1=                           |
+| =:print-curl= | N/A            | Outputs the generated curl call as a string instead of actually calling curl.           |
 
 ** examples
    
