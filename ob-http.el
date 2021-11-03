@@ -249,7 +249,7 @@
               "\n"))
     (with-current-buffer (get-buffer-create "*curl output*")
       (erase-buffer)
-      (if (= 0 (apply 'call-process "curl" nil `(t ,error-output) nil (ob-http-flatten args)))
+      (if (= 0 (apply 'process-file "curl" nil `(t ,error-output) nil (ob-http-flatten args)))
           (let ((response (ob-http-parse-response (buffer-string))))
             (when prettify (ob-http-pretty-response response (cdr pretty)))
             (when ob-http:remove-cr (ob-http-remove-carriage-return response))
