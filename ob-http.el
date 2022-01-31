@@ -70,6 +70,11 @@
   :group 'ob-http
   :type '(repeat (string :format "%v")))
 
+(defcustom ob-http:join-line-marker "\\\\"
+  "Regexp that will cause the line following it being merged into the previous line"
+  :group 'ob-http
+  :type 'regexp)
+
 (cl-defstruct ob-http-request method url headers body)
 (cl-defstruct ob-http-response headers body headers-map)
 
@@ -92,9 +97,10 @@
      :body (cadr headers-body)
      :headers-map headers-map)))
 
-;; todo allow mark to be customized
 (defun merge-marked-lines-into-previous-line (input)
-  (replace-regexp-in-string "\\(\r\n\\|[\n\r]\\)\\\\" "" input))
+  "Merges the lines that's start match ob-http:join-line-marker into the line before."
+  (let ((undesired-linebreak-regexp (concat "\\(\r\n\\|[\n\r]\\)" ob-http:join-line-marker)))
+    (replace-regexp-in-string undesired-linebreak-regexp "" input)))
 
 (defun ob-http-split-header-body (input)
   (let ((splited (s-split-up-to "\\(\r\n\\|[\n\r]\\)[ \t]*\\1" input 1)))
