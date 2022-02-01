@@ -199,16 +199,16 @@ supported headers:
 **** break long lines
 
 Especially when working with a lot of query parameters it might be useful to split lines.
-Therefore, lines that start with ~\~ (or whatever matches ~ob-http:join-line-marker~)
+Therefore, lines that start with one or more spaces or tabs (or whatever matches ~ob-http:join-line-marker~)
 will be merged into the previous line before processing.
 
 So the following two blocks are equivalent:
 
 : #+BEGIN_SRC http
 : GET https://api.github.com/repos/zweifisch/ob-http/pulls
-: \?state=open
-: \&sort=created-asc
-: \&no-assignee
+:  ?state=open
+:  &sort=created-asc
+:  &no-assignee
 : #+end_src
 
 : #+BEGIN_SRC http

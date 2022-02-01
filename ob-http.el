@@ -70,7 +70,7 @@
   :group 'ob-http
   :type '(repeat (string :format "%v")))
 
-(defcustom ob-http:join-line-marker "\\\\"
+(defcustom ob-http:join-line-marker "[ \t]+"
   "Regexp that will cause the line following it being merged into the previous line"
   :group 'ob-http
   :type 'regexp)
