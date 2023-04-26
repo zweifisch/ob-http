@@ -41,6 +41,7 @@ To use =ob-http= in an =org-babel= source block, the http language must be enabl
 | =:get-header= | N/A            | =:get-header X-Subject-Token=                                                           |
 | =:curl=       | N/A            | =:curl --insecure --compressed= additional arguments for curl                           |
 | =:resolve=    | =--resolve=    | =:resolve example.com:80:127.0.0.1,example.com:443:127.0.0.1=                           |
+| =:data-binary= | =--data-binary= | Use =--data-binary= instead of =--data= in the curl command                               |
 
 ** examples
    
@@ -156,6 +157,7 @@ supported headers:
 - port
 - user
 - max-time
+- data-binary
 
 : * api test
 : :PROPERTIES:
@@ -196,3 +198,36 @@ supported headers:
 : #+RESULTS:
 : [[file:zweifisch.jpeg]]
 
+
+    other data payloads
+
+: #+BEGIN_SRC http :data-binary
+: POST http://httpbin.org/post
+: Content-Type: application/octet-stream
+:
+: lots
+: of
+: line breaks
+: and insignificant=punctuation
+: #+END_SRC
+:
+: #+RESULTS:
+: #+begin_example
+: {
+:   "args": {},
+:   "data": "lots\nof\nline breaks\nand insignificant=punctuation",
+:   "files": {},
+:   "form": {},
+:   "headers": {
+:     "Accept": "*/*",
+:     "Content-Length": "48",
+:     "Content-Type": "application/octet-stream",
+:     "Host": "httpbin.org",
+:     "User-Agent": "curl/7.87.0",
+:     "X-Amzn-Trace-Id": "Root=1-6449b5bf-1e5eac452e4393943dce4a61"
+:   },
+:   "json": null,
+:   "origin": "44.237.72.92",
+:   "url": "http://httpbin.org/post"
+: }
+: #+end_example
