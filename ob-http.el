@@ -205,8 +205,8 @@
 
 (defun org-babel-execute:http (body params)
   (let* ((vars (org-babel--get-vars params))
-				 (body (s-replace-all
-								(map-apply (lambda (k v) (cons (concat "$"(symbol-name k)) v)) vars) body))
+         (body (s-replace-all
+                (map-apply (lambda (k v) (cons (concat "$"(symbol-name k)) v)) vars) body))
          (request (ob-http-parse-request (org-babel-expand-body:http body params)))
          (proxy (cdr (assoc :proxy params)))
          (noproxy (assoc :noproxy params))
