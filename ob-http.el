@@ -74,13 +74,15 @@
 (cl-defstruct ob-http-request method url headers body)
 (cl-defstruct ob-http-response headers body headers-map)
 
-(defun ob-http-parse-request (input)
+(defun ob-http-parse-request (input encode)
+	"Parse INPUT HTTP request as a method, an url, headers and a body.
+Optionnay ENCODE the url."
   (let* ((headers-body (ob-http-split-header-body input))
          (headers (s-split-up-to "\\(\r\n\\|[\n\r]\\)" (car headers-body) 1))
          (method-url (split-string (car headers) " ")))
     (make-ob-http-request
      :method (car method-url)
-     :url (cadr method-url)
+     :url (if encode (url-encode-url (cadr method-url)) (cadr method-url))
      :headers (if (cadr headers) (s-lines (cadr headers)))
      :body (cadr headers-body))))
 
@@ -223,6 +225,7 @@
          (cookie-jar (cdr (assoc :cookie-jar params)))
          (cookie (cdr (assoc :cookie params)))
          (tor (cdr (assoc :tor params)))
+         (encode (cdr (assoc :encode params)))
          (curl (cdr (assoc :curl params)))
          (select (cdr (assoc :select params)))
          (resolve (cdr (assoc :resolve params)))
