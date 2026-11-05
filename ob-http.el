@@ -40,6 +40,7 @@
     (curl . :any)
     (cookie . :any)
     (schema . :any)
+    (scheme . :any)
     (host . :any)
     (port . :any)
     (user . :any)
@@ -191,6 +192,7 @@
   (if (s-starts-with? "/" path)
       (s-concat
        (format "%s://" (or (assoc-default :schema params) "http"))
+       (or (assoc-default :scheme params) "https") "://"
        (assoc-default :host params)
        (when (assoc :port params)
              (format ":%s" (assoc-default :port params)))
