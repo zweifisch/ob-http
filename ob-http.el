@@ -246,7 +246,7 @@ Optionnay ENCODE the url."
                      (when (s-present? request-body)
                        (let ((tmp (org-babel-temp-file "http-")))
                          (with-temp-file tmp (insert request-body))
-                         `("-d" ,(format "@%s" tmp))))
+                         `("--data-binary" ,(format "@%s" tmp))))
                      (when cookie-jar `("--cookie-jar" ,cookie-jar))
                      (when cookie `("--cookie" ,cookie))
                      (when resolve (mapcar (lambda (x) `("--resolve" ,x)) (split-string resolve ",")))
