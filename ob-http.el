@@ -39,10 +39,10 @@
     (noproxy . :any)
     (curl . :any)
     (cookie . :any)
-    (schema . :any)
     (scheme . :any)
     (host . :any)
-    (port . :any)
+    (port . :number)
+    (tor . :boolean)
     (user . :any)
     (username . :any)  ;; deprecated, use user instead
     (password . :any)  ;; deprecated
@@ -207,22 +207,30 @@
       (insert body))))
 
 (defun org-babel-execute:http (body params)
-  (let* ((request (ob-http-parse-request (org-babel-expand-body:http body params)))
+	"Execute http request given BODY and PARAMS."
+
+  (let* ((request (ob-http-parse-request (org-babel-expand-body:http body params)
+																				 (cdr (assoc :encode params))))
+				 (scheme (or (cdr (assoc :proxy params)) "https"))
          (proxy (cdr (assoc :proxy params)))
          (noproxy (assoc :noproxy params))
-         (follow-redirect (and (assoc :follow-redirect params) (not (string= "no" (cdr (assoc :follow-redirect params))))))
+         (follow-redirect (and (assoc :follow-redirect params)
+															 (not (string= "no" (cdr (assoc :follow-redirect params))))))
          (pretty (assoc :pretty params))
          (prettify (and pretty (not (string= (cdr pretty) "no"))))
          (file (assoc :file params))
          (get-header (cdr (assoc :get-header params)))
          (cookie-jar (cdr (assoc :cookie-jar params)))
          (cookie (cdr (assoc :cookie params)))
+         (tor (cdr (assoc :tor params)))
          (curl (cdr (assoc :curl params)))
          (select (cdr (assoc :select params)))
          (resolve (cdr (assoc :resolve params)))
          (request-body (ob-http-request-body request))
          (error-output (org-babel-temp-file "curl-error"))
-         (args (append ob-http:curl-custom-arguments (list "-i"
+         (args (append ob-http:curl-custom-arguments (list
+                     (when tor "curl")
+                     "-i"
                      (when (and proxy (not noproxy)) `("-x" ,proxy))
                      (when noproxy '("--noproxy" "*"))
                      (let ((method (ob-http-request-method request)))
@@ -247,12 +255,16 @@
                      (ob-http-construct-url (ob-http-request-url request) params)))))
     (with-current-buffer (get-buffer-create "*curl commands history*")
       (goto-char (point-max))
-      (insert "curl "
+      (insert (if tor "torsocks " "") "curl "
               (string-join (mapcar 'shell-quote-argument (ob-http-flatten args)) " ")
               "\n"))
+
     (with-current-buffer (get-buffer-create "*curl output*")
       (erase-buffer)
-      (if (= 0 (apply 'call-process "curl" nil `(t ,error-output) nil (ob-http-flatten args)))
+      (if (= 0
+             (apply 'call-process
+                    (if tor "torsocks" "curl") nil `(t ,error-output) nil
+                    (ob-http-flatten  args)))
           (let ((response (ob-http-parse-response (buffer-string))))
             (when prettify (ob-http-pretty-response response (cdr pretty)))
             (when ob-http:remove-cr (ob-http-remove-carriage-return response))
