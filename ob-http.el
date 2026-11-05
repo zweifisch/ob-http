@@ -211,9 +211,8 @@ Optionnay ENCODE the url."
 
 (defun org-babel-execute:http (body params)
 	"Execute http request given BODY and PARAMS."
-
   (let* ((request (ob-http-parse-request (org-babel-expand-body:http body params)
-																				 (cdr (assoc :encode params))))
+                                         (cdr (assoc :encode params))))
 				 (scheme (or (cdr (assoc :proxy params)) "https"))
          (proxy (cdr (assoc :proxy params)))
          (noproxy (assoc :noproxy params))
@@ -279,7 +278,7 @@ Optionnay ENCODE the url."
                   (prettify (ob-http-response-body response))
                   (file (ob-http-file response (cdr file)))
                   (t (s-join "\n\n" (list (ob-http-response-headers response)
-																					(ob-http-response-body response))))))
+                                          (ob-http-response-body response))))))
         (with-output-to-temp-buffer "*curl error*"
           (princ (with-temp-buffer
                    (insert-file-contents-literally error-output)
