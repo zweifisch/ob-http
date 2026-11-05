@@ -24,7 +24,6 @@
 ;;
 ;; http request in org-mode babel
 ;;
-
 ;;; Code:
 (require 'ob)
 (require 's)
@@ -75,7 +74,7 @@
 (cl-defstruct ob-http-response headers body headers-map)
 
 (defun ob-http-parse-request (input encode)
-	"Parse INPUT HTTP request as a method, an url, headers and a body.
+  "Parse INPUT HTTP request as a method, an url, headers and a body.
 Optionnay ENCODE the url."
   (let* ((headers-body (ob-http-split-header-body input))
          (headers (s-split-up-to "\\(\r\n\\|[\n\r]\\)" (car headers-body) 1))
@@ -96,7 +95,7 @@ Optionnay ENCODE the url."
      :headers-map headers-map)))
 
 (defun ob-http-split-header-body (input)
-	"Split header from body in INPUT."
+  "Split header from body in INPUT."
   (let ((splited (s-split-up-to "\\(\r\n\\|[\n\r]\\)[ \t]*\\1" input 1)))
     (if (and (string-match "^HTTP/\\(1.[0-1]\\|2\\) \\(30\\|100\\)" (car splited))
              (string-match "^HTTP/\\(1.[0-1]\\|2\\)" (cadr splited)))
@@ -210,14 +209,14 @@ Optionnay ENCODE the url."
       (insert body))))
 
 (defun org-babel-execute:http (body params)
-	"Execute http request given BODY and PARAMS."
+  "Execute http request given BODY and PARAMS."
   (let* ((request (ob-http-parse-request (org-babel-expand-body:http body params)
                                          (cdr (assoc :encode params))))
-				 (scheme (or (cdr (assoc :proxy params)) "https"))
+         (scheme (or (cdr (assoc :proxy params)) "https"))
          (proxy (cdr (assoc :proxy params)))
          (noproxy (assoc :noproxy params))
          (follow-redirect (and (assoc :follow-redirect params)
-															 (not (string= "no" (cdr (assoc :follow-redirect params))))))
+                               (not (string= "no" (cdr (assoc :follow-redirect params))))))
          (pretty (assoc :pretty params))
          (prettify (and pretty (not (string= (cdr pretty) "no"))))
          (file (assoc :file params))
@@ -256,7 +255,6 @@ Optionnay ENCODE the url."
                                         ob-http:max-time))
                      "--globoff"
                      (ob-http-construct-url (ob-http-request-url request) params)))))
-    (message"%s" request)
 
     (with-current-buffer (get-buffer-create "*curl commands history*")
       (goto-char (point-max))
