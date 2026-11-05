@@ -87,6 +87,7 @@ Optionnay ENCODE the url."
      :body (cadr headers-body))))
 
 (defun ob-http-parse-response (response)
+  "Parse HTTP RESPONSE as a header and a body.."
   (let* ((headers-body (ob-http-split-header-body response))
          (headers-map (mapcar 'ob-http-parse-header (s-lines (car headers-body)))))
     (make-ob-http-response
@@ -275,7 +276,8 @@ Optionnay ENCODE the url."
                   (select (ob-http-select response select))
                   (prettify (ob-http-response-body response))
                   (file (ob-http-file response (cdr file)))
-                  (t (s-join "\n\n" (list (ob-http-response-headers response) (ob-http-response-body response))))))
+                  (t (s-join "\n\n" (list (ob-http-response-headers response)
+																					(ob-http-response-body response))))))
         (with-output-to-temp-buffer "*curl error*"
           (princ (with-temp-buffer
                    (insert-file-contents-literally error-output)
