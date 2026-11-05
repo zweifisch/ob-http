@@ -191,7 +191,6 @@
 (defun ob-http-construct-url (path params)
   (if (s-starts-with? "/" path)
       (s-concat
-       (format "%s://" (or (assoc-default :schema params) "http"))
        (or (assoc-default :scheme params) "https") "://"
        (assoc-default :host params)
        (when (assoc :port params)
