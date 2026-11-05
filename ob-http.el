@@ -79,7 +79,7 @@
 Optionnay ENCODE the url."
   (let* ((headers-body (ob-http-split-header-body input))
          (headers (s-split-up-to "\\(\r\n\\|[\n\r]\\)" (car headers-body) 1))
-				 (method-url (s-split-up-to " " (car headers) 1)))
+         (method-url (s-split-up-to " " (car headers) 1)))
     (make-ob-http-request
      :method (car method-url)
      :url (if encode (url-encode-url (cadr method-url)) (cadr method-url))
@@ -257,6 +257,8 @@ Optionnay ENCODE the url."
                                         ob-http:max-time))
                      "--globoff"
                      (ob-http-construct-url (ob-http-request-url request) params)))))
+    (message"%s" request)
+
     (with-current-buffer (get-buffer-create "*curl commands history*")
       (goto-char (point-max))
       (insert (if tor "torsocks " "") "curl "
