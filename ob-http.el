@@ -50,24 +50,24 @@
     (path-prefix . :any)
     (resolve . :any)
     (max-time . :any))
-  "http header arguments")
+  "Http header arguments.")
 
 (defgroup ob-http nil
-  "org-mode blocks for http request"
+  "Org-mode blocks for http request."
   :group 'org)
 
 (defcustom ob-http:max-time 10
-  "maximum time in seconds that you allow the whole operation to take"
+  "Maximum time in seconds that you allow the whole operation to take."
   :group 'ob-http
   :type 'integer)
 
 (defcustom ob-http:remove-cr nil
-  "remove carriage return from header"
+  "Remove carriage return from header."
   :group 'ob-http
   :type 'boolean)
 
 (defcustom ob-http:curl-custom-arguments nil
-  "List of custom headers that shall be added to each curl request"
+  "List of custom headers that shall be added to each curl request."
   :group 'ob-http
   :type '(repeat (string :format "%v")))
 
@@ -93,6 +93,7 @@
      :headers-map headers-map)))
 
 (defun ob-http-split-header-body (input)
+	"Split header from body in INPUT."
   (let ((splited (s-split-up-to "\\(\r\n\\|[\n\r]\\)[ \t]*\\1" input 1)))
     (if (and (string-match "^HTTP/\\(1.[0-1]\\|2\\) \\(30\\|100\\)" (car splited))
              (string-match "^HTTP/\\(1.[0-1]\\|2\\)" (cadr splited)))
@@ -189,6 +190,7 @@
   (assoc-default (intern key) alist))
 
 (defun ob-http-construct-url (path params)
+  "Construct the base URL from PATH and PARAMS."
   (if (s-starts-with? "/" path)
       (s-concat
        (or (assoc-default :scheme params) "https") "://"
