@@ -79,7 +79,7 @@
          (method-url (split-string (car headers) " ")))
     (make-ob-http-request
      :method (car method-url)
-     :url (cadr method-url)
+     :url (url-encode-url (cadr method-url))
      :headers (if (cadr headers) (s-lines (cadr headers)))
      :body (cadr headers-body))))
 
