@@ -160,6 +160,10 @@ supported headers:
 - user
 - max-time
 
+=:scheme= selects the URL scheme for relative request paths and defaults to
+=http=. The deprecated =:schema= argument is still supported as an alias;
+when both are supplied, =:scheme= takes precedence. Absolute URLs are unchanged.
+
 : * api test
 : :PROPERTIES:
 : :header-args: :var token="secret" :host httpbin.org :pretty

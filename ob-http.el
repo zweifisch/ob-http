@@ -40,6 +40,7 @@
     (curl . :any)
     (cookie . :any)
     (scheme . :any)
+    (schema . :any)  ;; deprecated, use scheme instead
     (host . :any)
     (port . :any)
     (user . :any)
@@ -191,7 +192,9 @@
 (defun ob-http-construct-url (path params)
   (if (s-starts-with? "/" path)
       (s-concat
-       (format "%s://" (or (assoc-default :scheme params) "http"))
+       (format "%s://" (or (assoc-default :scheme params)
+                            (assoc-default :schema params)
+                            "http"))
        (assoc-default :host params)
        (when (assoc :port params)
              (format ":%s" (assoc-default :port params)))
