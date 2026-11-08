@@ -154,7 +154,7 @@ supported headers:
 - proxy
 - noproxy
 - cookie
-- schema
+- scheme
 - host
 - port
 - user
