@@ -154,11 +154,15 @@ supported headers:
 - proxy
 - noproxy
 - cookie
-- schema
+- scheme
 - host
 - port
 - user
 - max-time
+
+=:scheme= selects the URL scheme for relative request paths and defaults to
+=http=. The deprecated =:schema= argument is still supported as an alias;
+when both are supplied, =:scheme= takes precedence. Absolute URLs are unchanged.
 
 : * api test
 : :PROPERTIES:
