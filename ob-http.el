@@ -127,6 +127,7 @@
   (cond
    ((executable-find "xml_pp") (ob-http-shell-command-to-string "xml_pp" str))
    ((executable-find "xmlstarlet") (ob-http-shell-command-to-string "xmlstarlet fo" str))
+   ((executable-find "xmllint") (ob-http-shell-command-to-string "xmllint --format -" str))
    (t str)))
 
 (defun ob-http-pretty-html (str)
