@@ -39,6 +39,7 @@
     (curl . :any)
     (cookie . :any)
     (scheme . :any)
+    (schema . :any)  ;; deprecated, use scheme instead
     (host . :any)
     (port . :number)
     (tor . :boolean)
@@ -131,6 +132,7 @@ Optionnay ENCODE the url."
   (cond
    ((executable-find "xml_pp") (ob-http-shell-command-to-string "xml_pp" str))
    ((executable-find "xmlstarlet") (ob-http-shell-command-to-string "xmlstarlet fo" str))
+   ((executable-find "xmllint") (ob-http-shell-command-to-string "xmllint --format -" str))
    (t str)))
 
 (defun ob-http-pretty-html (str)
@@ -195,7 +197,9 @@ Optionnay ENCODE the url."
   "Construct the base URL from PATH and PARAMS."
   (if (s-starts-with? "/" path)
       (s-concat
-       (or (assoc-default :scheme params) "https") "://"
+       (or (assoc-default :scheme params)
+           (assoc-default :schema params)
+           "https")) "://"
        (assoc-default :host params)
        (when (assoc :port params)
              (format ":%s" (assoc-default :port params)))
@@ -213,6 +217,7 @@ Optionnay ENCODE the url."
   (let* ((request (ob-http-parse-request (org-babel-expand-body:http body params)
                                          (cdr (assoc :encode params))))
          (scheme (or (cdr (assoc :proxy params)) "https"))
+         (dry-run (assoc :dry-run params))
          (proxy (cdr (assoc :proxy params)))
          (noproxy (assoc :noproxy params))
          (follow-redirect (and (assoc :follow-redirect params)
@@ -255,6 +260,11 @@ Optionnay ENCODE the url."
                                         ob-http:max-time))
                      "--globoff"
                      (ob-http-construct-url (ob-http-request-url request) params)))))
+    
+    (if dry-run
+        (concat
+         "curl " (string-join (mapcar 'shell-quote-argument (ob-http-flatten args)) " ")
+         "\n")
 
     (with-current-buffer (get-buffer-create "*curl commands history*")
       (goto-char (point-max))
@@ -281,7 +291,7 @@ Optionnay ENCODE the url."
           (princ (with-temp-buffer
                    (insert-file-contents-literally error-output)
                    (s-join "\n" (s-lines (buffer-string)))))
-          "")))))
+          ""))))))
 
 (defun ob-http-export-expand-variables (&optional backend)
   "Scan current buffer for all HTTP source code blocks and expand variables.
