@@ -24,7 +24,6 @@
 ;;
 ;; http request in org-mode babel
 ;;
-
 ;;; Code:
 (require 'ob)
 (require 's)
@@ -42,7 +41,8 @@
     (scheme . :any)
     (schema . :any)  ;; deprecated, use scheme instead
     (host . :any)
-    (port . :any)
+    (port . :number)
+    (tor . :boolean)
     (user . :any)
     (username . :any)  ;; deprecated, use user instead
     (password . :any)  ;; deprecated
@@ -50,41 +50,44 @@
     (path-prefix . :any)
     (resolve . :any)
     (max-time . :any))
-  "http header arguments")
+  "Http header arguments.")
 
 (defgroup ob-http nil
-  "org-mode blocks for http request"
+  "Org-mode blocks for http request."
   :group 'org)
 
 (defcustom ob-http:max-time 10
-  "maximum time in seconds that you allow the whole operation to take"
+  "Maximum time in seconds that you allow the whole operation to take."
   :group 'ob-http
   :type 'integer)
 
 (defcustom ob-http:remove-cr nil
-  "remove carriage return from header"
+  "Remove carriage return from header."
   :group 'ob-http
   :type 'boolean)
 
 (defcustom ob-http:curl-custom-arguments nil
-  "List of custom headers that shall be added to each curl request"
+  "List of custom headers that shall be added to each curl request."
   :group 'ob-http
   :type '(repeat (string :format "%v")))
 
 (cl-defstruct ob-http-request method url headers body)
 (cl-defstruct ob-http-response headers body headers-map)
 
-(defun ob-http-parse-request (input)
+(defun ob-http-parse-request (input encode)
+  "Parse INPUT HTTP request as a method, an url, headers and a body.
+Optionnay ENCODE the url."
   (let* ((headers-body (ob-http-split-header-body input))
          (headers (s-split-up-to "\\(\r\n\\|[\n\r]\\)" (car headers-body) 1))
-         (method-url (split-string (car headers) " ")))
+         (method-url (s-split-up-to " " (car headers) 1)))
     (make-ob-http-request
      :method (car method-url)
-     :url (url-encode-url (cadr method-url))
+     :url (if encode (url-encode-url (cadr method-url)) (cadr method-url))
      :headers (if (cadr headers) (s-lines (cadr headers)))
      :body (cadr headers-body))))
 
 (defun ob-http-parse-response (response)
+  "Parse HTTP RESPONSE as a header and a body.."
   (let* ((headers-body (ob-http-split-header-body response))
          (headers-map (mapcar 'ob-http-parse-header (s-lines (car headers-body)))))
     (make-ob-http-response
@@ -93,6 +96,7 @@
      :headers-map headers-map)))
 
 (defun ob-http-split-header-body (input)
+  "Split header from body in INPUT."
   (let ((splited (s-split-up-to "\\(\r\n\\|[\n\r]\\)[ \t]*\\1" input 1)))
     (if (and (string-match "^HTTP/\\(1.[0-1]\\|2\\) \\(30\\|100\\)" (car splited))
              (string-match "^HTTP/\\(1.[0-1]\\|2\\)" (cadr splited)))
@@ -190,11 +194,12 @@
   (assoc-default (intern key) alist))
 
 (defun ob-http-construct-url (path params)
+  "Construct the base URL from PATH and PARAMS."
   (if (s-starts-with? "/" path)
       (s-concat
-       (format "%s://" (or (assoc-default :scheme params)
-                            (assoc-default :schema params)
-                            "http"))
+       (or (assoc-default :scheme params)
+           (assoc-default :schema params)
+           "https")) "://"
        (assoc-default :host params)
        (when (assoc :port params)
              (format ":%s" (assoc-default :port params)))
@@ -208,23 +213,31 @@
       (insert body))))
 
 (defun org-babel-execute:http (body params)
-  (let* ((request (ob-http-parse-request (org-babel-expand-body:http body params)))
-	 (print-curl (assoc :print-curl params))
+  "Execute http request given BODY and PARAMS."
+  (let* ((request (ob-http-parse-request (org-babel-expand-body:http body params)
+                                         (cdr (assoc :encode params))))
+         (scheme (or (cdr (assoc :proxy params)) "https"))
+         (dry-run (assoc :dry-run params))
          (proxy (cdr (assoc :proxy params)))
          (noproxy (assoc :noproxy params))
-         (follow-redirect (and (assoc :follow-redirect params) (not (string= "no" (cdr (assoc :follow-redirect params))))))
+         (follow-redirect (and (assoc :follow-redirect params)
+                               (not (string= "no" (cdr (assoc :follow-redirect params))))))
          (pretty (assoc :pretty params))
          (prettify (and pretty (not (string= (cdr pretty) "no"))))
          (file (assoc :file params))
          (get-header (cdr (assoc :get-header params)))
          (cookie-jar (cdr (assoc :cookie-jar params)))
          (cookie (cdr (assoc :cookie params)))
+         (tor (cdr (assoc :tor params)))
+         (encode (cdr (assoc :encode params)))
          (curl (cdr (assoc :curl params)))
          (select (cdr (assoc :select params)))
          (resolve (cdr (assoc :resolve params)))
          (request-body (ob-http-request-body request))
          (error-output (org-babel-temp-file "curl-error"))
-         (args (append ob-http:curl-custom-arguments (list "-i"
+         (args (append ob-http:curl-custom-arguments (list
+                     (when tor "curl")
+                     "-i"
                      (when (and proxy (not noproxy)) `("-x" ,proxy))
                      (when noproxy '("--noproxy" "*"))
                      (let ((method (ob-http-request-method request)))
@@ -237,7 +250,7 @@
                      (when (s-present? request-body)
                        (let ((tmp (org-babel-temp-file "http-")))
                          (with-temp-file tmp (insert request-body))
-                         `("-d" ,(format "@%s" tmp))))
+                         `("--data-binary" ,(format "@%s" tmp))))
                      (when cookie-jar `("--cookie-jar" ,cookie-jar))
                      (when cookie `("--cookie" ,cookie))
                      (when resolve (mapcar (lambda (x) `("--resolve" ,x)) (split-string resolve ",")))
@@ -248,18 +261,23 @@
                      "--globoff"
                      (ob-http-construct-url (ob-http-request-url request) params)))))
     
-    (if print-curl (concat "curl "
-              (string-join (mapcar 'shell-quote-argument (ob-http-flatten args)) " ")
-              "\n")
-      
+    (if dry-run
+        (concat
+         "curl " (string-join (mapcar 'shell-quote-argument (ob-http-flatten args)) " ")
+         "\n")
+
     (with-current-buffer (get-buffer-create "*curl commands history*")
       (goto-char (point-max))
-      (insert "curl "
+      (insert (if tor "torsocks " "") "curl "
               (string-join (mapcar 'shell-quote-argument (ob-http-flatten args)) " ")
               "\n"))
+
     (with-current-buffer (get-buffer-create "*curl output*")
       (erase-buffer)
-      (if (= 0 (apply 'call-process "curl" nil `(t ,error-output) nil (ob-http-flatten args)))
+      (if (= 0
+             (apply 'call-process
+                    (if tor "torsocks" "curl") nil `(t ,error-output) nil
+                    (ob-http-flatten  args)))
           (let ((response (ob-http-parse-response (buffer-string))))
             (when prettify (ob-http-pretty-response response (cdr pretty)))
             (when ob-http:remove-cr (ob-http-remove-carriage-return response))
@@ -267,7 +285,8 @@
                   (select (ob-http-select response select))
                   (prettify (ob-http-response-body response))
                   (file (ob-http-file response (cdr file)))
-                  (t (s-join "\n\n" (list (ob-http-response-headers response) (ob-http-response-body response))))))
+                  (t (s-join "\n\n" (list (ob-http-response-headers response)
+                                          (ob-http-response-body response))))))
         (with-output-to-temp-buffer "*curl error*"
           (princ (with-temp-buffer
                    (insert-file-contents-literally error-output)
